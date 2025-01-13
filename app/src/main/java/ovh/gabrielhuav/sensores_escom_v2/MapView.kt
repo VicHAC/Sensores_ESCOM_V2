@@ -1,11 +1,7 @@
 package ovh.gabrielhuav.sensores_escom_v2
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -20,7 +16,6 @@ class MapView(context: Context, attrs: AttributeSet? = null) : View(context, att
         style = Paint.Style.STROKE
     }
     private val paintLocalPlayer = Paint().apply {
-        color = Color.BLUE
         style = Paint.Style.FILL
     }
     private val paintRemotePlayer = Paint().apply {
@@ -34,6 +29,9 @@ class MapView(context: Context, attrs: AttributeSet? = null) : View(context, att
     private var localPlayerPosition: Pair<Int, Int>? = null
     private var remotePlayerPosition: Pair<Int, Int>? = null
 
+    private var playerColor: Int = Color.BLUE
+    private var playerShape: String = "Cuadrado"
+
     private val backgroundBitmap: Bitmap? = try {
         BitmapFactory.decodeResource(resources, R.drawable.escom_mapa)
     } catch (e: Exception) {
@@ -45,6 +43,7 @@ class MapView(context: Context, attrs: AttributeSet? = null) : View(context, att
 
     init {
         initializeDetectors()
+        loadPlayerPreferences()
     }
 
     private fun initializeDetectors() {
@@ -93,6 +92,20 @@ class MapView(context: Context, attrs: AttributeSet? = null) : View(context, att
         offsetY = offsetY.coerceIn(maxOffsetY, 0f)
     }
 
+    private fun loadPlayerPreferences() {
+        val preferences = context.getSharedPreferences("PlayerSettings", Context.MODE_PRIVATE)
+        val color = preferences.getString("color", "Azul")
+        val shape = preferences.getString("shape", "Cuadrado")
+
+        playerColor = when (color) {
+            "Rojo" -> Color.RED
+            "Verde" -> Color.GREEN
+            else -> Color.BLUE
+        }
+        playerShape = shape ?: "Cuadrado"
+        paintLocalPlayer.color = playerColor
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -124,11 +137,15 @@ class MapView(context: Context, attrs: AttributeSet? = null) : View(context, att
             canvas.drawLine(0f, i * cellHeight, backgroundBitmap.width.toFloat(), i * cellHeight, paintGrid)
         }
 
-        // Dibujar jugador local (azul)
+        // Dibujar jugador local
         localPlayerPosition?.let {
             val playerX = it.first * cellWidth + cellWidth / 2
             val playerY = it.second * cellHeight + cellHeight / 2
-            canvas.drawCircle(playerX, playerY, cellWidth / 4f, paintLocalPlayer)
+            when (playerShape) {
+                "Triángulo" -> drawTriangle(canvas, playerX, playerY, cellWidth / 2)
+                "Círculo" -> canvas.drawCircle(playerX, playerY, cellWidth / 4f, paintLocalPlayer)
+                else -> canvas.drawRect(playerX - cellWidth / 4, playerY - cellHeight / 4, playerX + cellWidth / 4, playerY + cellHeight / 4, paintLocalPlayer)
+            }
         }
 
         // Dibujar jugador remoto (rojo)
@@ -139,6 +156,15 @@ class MapView(context: Context, attrs: AttributeSet? = null) : View(context, att
         }
 
         canvas.restore()
+    }
+
+    private fun drawTriangle(canvas: Canvas, x: Float, y: Float, size: Float) {
+        val path = Path()
+        path.moveTo(x, y - size)
+        path.lineTo(x - size, y + size)
+        path.lineTo(x + size, y + size)
+        path.close()
+        canvas.drawPath(path, paintLocalPlayer)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

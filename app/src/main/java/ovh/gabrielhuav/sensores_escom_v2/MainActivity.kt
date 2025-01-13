@@ -54,6 +54,13 @@ class MainActivity : AppCompatActivity() {
                 requestPermissions()
             }
         }
+
+        // Boton para configuracion
+        val settingsButton = findViewById<Button>(R.id.btnSettings)
+        settingsButton.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun hasPermissions(): Boolean {

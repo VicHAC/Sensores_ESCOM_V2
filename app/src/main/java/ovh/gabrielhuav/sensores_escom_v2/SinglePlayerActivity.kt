@@ -52,6 +52,11 @@ class SinglePlayerActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        mapView.invalidate() // Redibujar el mapa para aplicar los cambios
+    }
+
     private fun setupMovementButtons(
         btnNorth: Button,
         btnSouth: Button,

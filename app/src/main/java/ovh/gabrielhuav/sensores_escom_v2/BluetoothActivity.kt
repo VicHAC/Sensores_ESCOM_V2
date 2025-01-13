@@ -93,6 +93,11 @@ class BluetoothActivity : AppCompatActivity(), BluetoothGameManager.ConnectionLi
         mapView.updateLocalPlayerPosition(localPlayerPosition)
     }
 
+    override fun onResume() {
+        super.onResume()
+        mapView.invalidate() // Redibujar el mapa para aplicar los cambios
+    }
+
     private fun setupButtonListeners() {
         btnStartServer.setOnClickListener { startServer() }
         btnConnectDevice.setOnClickListener {

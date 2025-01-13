@@ -48,5 +48,8 @@
             android:name=".DeviceListActivity"
             android:exported="true"
             android:theme="@style/Theme.Sensores_ESCOM_V2" />
+
+        <!-- Declaración de SettingsActivity -->
+        <activity android:name=".SettingsActivity" />
     </application>
 </manifest>
